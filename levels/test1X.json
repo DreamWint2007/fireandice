@@ -1,0 +1,738 @@
+{
+    "levelname": "test1X",
+    "initial_bpm": 151.99908088235293,
+    "Beats": [
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "none"
+        },
+        {
+            "angle": 180.0,
+            "event": "complete"
+        }
+    ]
+}
