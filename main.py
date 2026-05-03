@@ -15,9 +15,16 @@ class Node:
         self.event = event
 
 class ADOFAI(QWidget):
-    def __init__(self, level_path):
+    def __init__(self, level_path, game_mode="normal"):
         super().__init__()
         self.level_path = level_path
+        self.game_mode = game_mode  # normal, auto, hard
+        if game_mode == "hard":
+            self.hit_tolerance = 30.0
+            self.miss_tolerance = 30.0
+        else:
+            self.hit_tolerance = 60.0
+            self.miss_tolerance = 60.0
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.init_game()
         
@@ -115,14 +122,27 @@ class ADOFAI(QWidget):
                     
         elif self.state == "playing":
             # Update moving ball position
+            prev_off = self.current_angle_offset
             speed = self.deg_per_sec * dt * self.rotation_dir
             self.current_angle_offset += speed
-            
-            # Check for failure (missed the beat by more than 60 degrees)
-            if self.rotation_dir == 1 and self.current_angle_offset > 60.0:
-                self.lose_game()
-            elif self.rotation_dir == -1 and self.current_angle_offset < -60.0:
-                self.lose_game()
+            new_off = self.current_angle_offset
+
+            auto_advanced = False
+            if self.game_mode == "auto":
+                crossed_zero = (
+                    self.rotation_dir == 1 and prev_off <= 0.0 and new_off >= 0.0
+                ) or (
+                    self.rotation_dir == -1 and prev_off >= 0.0 and new_off <= 0.0
+                )
+                if crossed_zero or abs(new_off) < 1e-6:
+                    self.advance_node(0.0 if crossed_zero else new_off)
+                    auto_advanced = True
+
+            if not auto_advanced:
+                if self.rotation_dir == 1 and self.current_angle_offset > self.miss_tolerance:
+                    self.lose_game()
+                elif self.rotation_dir == -1 and self.current_angle_offset < -self.miss_tolerance:
+                    self.lose_game()
             
         # Update Camera
         fixed_node = self.nodes[self.curr_node_idx]
@@ -147,10 +167,11 @@ class ADOFAI(QWidget):
             return
             
         if self.state == "playing":
+            if self.game_mode == "auto":
+                return
             # Attempt to hit the node
             diff = self.current_angle_offset
-            if abs(diff) <= 60.0:
-                # Success
+            if abs(diff) <= self.hit_tolerance:
                 self.advance_node(diff)
             else:
                 self.lose_game()
@@ -245,6 +266,10 @@ class ADOFAI(QWidget):
         
         painter.setPen(QColor(255, 255, 255))
         painter.setFont(QFont("Arial", 24))
+        mode_label = {"normal": "基础", "auto": "自动", "hard": "困难"}.get(
+            self.game_mode, self.game_mode
+        )
+        painter.drawText(20, height - 20, f"模式: {mode_label}")
         if self.state == "pre_start":
             painter.drawText(20, 40, f"Ready... {3 - self.pre_start_circle_count}")
         elif self.state == "lose":
@@ -257,16 +282,21 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Dance of Fire and Ice Clone")
         self.setGeometry(100, 100, 800, 600)
-        
+
         level_file = "levels/test1X.json"
-        if len(sys.argv) > 1:
-            level_file = sys.argv[1]
-            
+        game_mode = "normal"
+        for arg in sys.argv[1:]:
+            low = arg.lower()
+            if low in ("auto", "hard", "normal"):
+                game_mode = low
+            elif os.path.isfile(arg) or arg.endswith(".json"):
+                level_file = arg
+
         if not os.path.exists(level_file):
             print("Level file not found!")
             sys.exit()
-            
-        self.game = ADOFAI(level_file)
+
+        self.game = ADOFAI(level_file, game_mode=game_mode)
         self.setCentralWidget(self.game)
 
 if __name__ == "__main__":
