@@ -151,7 +151,7 @@ class LevelGenerator(QMainWindow):
             game_script = os.path.join(os.getcwd(), "main.py")
             if os.path.exists(game_script):
                 # Use current python executable to avoid environment issues
-                subprocess.Popen([sys.executable, game_script, self.generated_level_path])
+                subprocess.Popen([sys.executable, game_script, self.generated_level_path, "auto"])
             else:
                 QMessageBox.warning(self, "Error", "main.py not found in current directory.")
 
