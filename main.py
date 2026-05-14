@@ -207,14 +207,14 @@ class FireAndIceGame(QWidget):
 
     def update_prestart(self, dt: float) -> None:
         # Ball B rotates clockwise around node 0 for 3 full circles at 2x speed.
-        self.prestart_angle += self.angular_speed * 2.0 * dt
+        self.prestart_angle -= self.angular_speed * 2.0 * dt
         center = self.nodes[0]
         start_vec = vec_sub(self.nodes[1], self.nodes[0])
         rot_vec = rotate_screen(start_vec, self.prestart_angle)
         self.ball_a_pos = self.nodes[0]
         self.ball_b_pos = vec_add(center, rot_vec)
 
-        if self.prestart_angle >= self.PRESTART_TURNS * 360.0:
+        if self.prestart_angle <= -self.PRESTART_TURNS * 360.0:
             self.state = "playing"
             self.current_beat_idx = 0
             self.current_angle = self.carry_offset
@@ -254,7 +254,11 @@ class FireAndIceGame(QWidget):
         self.sync_ball_positions()
 
         if self.current_angle >= beat.angle:
-            self.handle_beat_landing()
+            if self.mode == "auto" or self.player_hit_this_beat:
+                self.handle_beat_landing()
+                return
+            if self.current_angle - beat.angle > self.fail_tolerance:
+                self.fail(f"未按键踩点（节点 {self.current_beat_idx + 1}）")
 
     def handle_beat_landing(self) -> None:
         beat = self.beats[self.current_beat_idx]
@@ -293,7 +297,8 @@ class FireAndIceGame(QWidget):
         err = self.current_angle - target
         abs_err = abs(err)
 
-        if abs_err <= self.success_tolerance:
+        # In manual modes, any hit within fail_tolerance is accepted.
+        if abs_err <= self.fail_tolerance:
             self.player_hit_this_beat = True
             self.carry_offset = err
             self.current_angle = target
@@ -301,8 +306,7 @@ class FireAndIceGame(QWidget):
             self.handle_beat_landing()
             return
 
-        if abs_err >= self.fail_tolerance:
-            self.fail(f"偏差过大：{abs_err:.1f}°（节点 {self.current_beat_idx + 1}）")
+        self.fail(f"偏差过大：{abs_err:.1f}°（节点 {self.current_beat_idx + 1}）")
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         key = event.key()
