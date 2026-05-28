@@ -3,11 +3,11 @@ import math
 import os
 import sys
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 from PyQt6.QtCore import QElapsedTimer, QTimer, Qt, QUrl
-from PyQt6.QtGui import QColor, QFont, QKeyEvent, QPainter, QPen
-from PyQt6.QtWidgets import QApplication, QWidget
+from PyQt6.QtGui import QColor, QFont, QFontDatabase, QKeyEvent, QPainter, QPen
+from PyQt6.QtWidgets import QApplication, QLabel, QListWidget, QPushButton, QVBoxLayout, QWidget
 try:
     from PyQt6.QtMultimedia import QAudioOutput, QMediaPlayer
 except ImportError:
@@ -84,6 +84,8 @@ class FireAndIceGame(QWidget):
         self.current_angle = 0.0
         self.carry_offset = 0.0
         self.player_hit_this_beat = False
+        self.perfect_hits = 0
+        self.good_hits = 0
 
         self.ball_a_pos: Vec2 = (0.0, 0.0)
         self.ball_b_pos: Vec2 = (0.0, 0.0)
@@ -95,6 +97,8 @@ class FireAndIceGame(QWidget):
         self.setWindowTitle("Fire and Ice")
         self.resize(1200, 800)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        # Ensure close() destroys the window so hidden game loops do not accumulate.
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
 
         self.load_level()
         self.build_map()
@@ -105,6 +109,15 @@ class FireAndIceGame(QWidget):
         self.timer.timeout.connect(self.tick)
         self.timer.start(16)
         self.elapsed.start()
+
+    def shutdown(self) -> None:
+        if hasattr(self, "timer") and self.timer.isActive():
+            self.timer.stop()
+        self.stop_level_music()
+
+    def closeEvent(self, event) -> None:
+        self.shutdown()
+        super().closeEvent(event)
 
     @property
     def angular_speed(self) -> float:
@@ -191,6 +204,8 @@ class FireAndIceGame(QWidget):
         self.current_angle = 0.0
         self.carry_offset = 0.0
         self.player_hit_this_beat = False
+        self.perfect_hits = 0
+        self.good_hits = 0
         self.ball_a_pos = self.nodes[0]
         self.ball_b_pos = self.nodes[1]
         self.camera_pos = self.nodes[0]
@@ -299,6 +314,10 @@ class FireAndIceGame(QWidget):
 
         # In manual modes, any hit within fail_tolerance is accepted.
         if abs_err <= self.fail_tolerance:
+            if abs_err < 30.0:
+                self.perfect_hits += 1
+            elif abs_err <= 60.0:
+                self.good_hits += 1
             self.player_hit_this_beat = True
             self.carry_offset = err
             self.current_angle = target
@@ -310,10 +329,6 @@ class FireAndIceGame(QWidget):
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         key = event.key()
-        if key == Qt.Key.Key_Escape:
-            self.close()
-            return
-
         if key == Qt.Key.Key_M:
             self.mode = {"default": "auto", "auto": "hard", "hard": "default"}[self.mode]
             self.reset_run()
@@ -384,7 +399,10 @@ class FireAndIceGame(QWidget):
 
         # HUD
         painter.setPen(QColor(240, 240, 245))
-        font = QFont("Consolas", 11)
+        # Consolas is often missing on macOS; prefer available monospaced families.
+        families = QFontDatabase.families()
+        mono_family = next((name for name in ("Menlo", "SF Mono", "Monaco", "Courier New", "Consolas") if name in families), "")
+        font = QFont(mono_family, 11) if mono_family else QFont()
         painter.setFont(font)
 
         status = f"Level: {self.level_name} | BPM: {self.bpm:.1f} | Mode: {self.mode}"
@@ -393,28 +411,226 @@ class FireAndIceGame(QWidget):
         if self.state == "prestart":
             info = "预备阶段：小球B正在3拍热身旋转..."
         elif self.state == "playing":
-            info = f"进行中：第 {self.current_beat_idx + 1}/{len(self.beats)} 拍 | 按任意键踩点（Esc退出，M切模式）"
+            info = f"进行中：第 {self.current_beat_idx + 1}/{len(self.beats)} 拍 | 按任意键踩点（M切模式）"
         elif self.state == "failed":
-            info = f"失败：{self.fail_reason} | 按任意键重开（Esc退出，M切模式）"
+            info = f"失败：{self.fail_reason} | 按任意键重开（M切模式）"
         else:
-            info = "胜利！按任意键重开（Esc退出，M切模式）"
+            info = "胜利！按任意键重开（M切模式）"
+            if self.mode == "default":
+                total_beats = len(self.beats)
+                acc = (self.perfect_hits / total_beats) if total_beats else 0.0
+                info += f" | ACC: {acc * 100:.2f}%"
         painter.drawText(16, 52, info)
 
+        if self.state == "won":
+            if self.mode == "default":
+                total_beats = len(self.beats)
+                acc = (self.perfect_hits / total_beats) if total_beats else 0.0
+                center_text = f"恭喜通关！准确率：{acc * 100:.2f}%"
+            elif self.mode == "hard":
+                center_text = "严格模式通关！\n孩子你无敌了！"
+            else:
+                center_text = ""
 
-def pick_default_level(work_dir: str) -> str:
-    levels_dir = os.path.join(work_dir, "levels")
-    if not os.path.isdir(levels_dir):
-        raise FileNotFoundError("未找到 levels 目录。")
+            if center_text:
+                painter.setPen(QColor(255, 244, 168))
+                center_font = QFont(mono_family, 30) if mono_family else QFont()
+                if not mono_family:
+                    center_font.setPointSize(30)
+                center_font.setBold(True)
+                painter.setFont(center_font)
+                painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, center_text)
 
-    files = [f for f in os.listdir(levels_dir) if f.lower().endswith(".json")]
-    if not files:
-        raise FileNotFoundError("levels 目录中没有 json 关卡文件。")
 
-    files.sort()
-    preferred = os.path.join(levels_dir, "test1X.json")
-    if os.path.exists(preferred):
-        return preferred
-    return os.path.join(levels_dir, files[0])
+class LevelSelectWindow(QWidget):
+    def __init__(self, work_dir: str, mode: str = "default") -> None:
+        super().__init__()
+        self.work_dir = work_dir
+        self.default_mode = mode if mode in {"default", "auto", "hard"} else "default"
+        self.level_map: Dict[str, str] = {}
+        self.game_window = None
+        self.pending_level_name = ""
+        self.pending_level_path = ""
+        self.in_mode_select = False
+
+        self.setWindowTitle("Fire and Ice - 选关")
+        self.resize(720, 520)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
+        self.title_label = QLabel("选择关卡（仅显示同时存在 .json 与 .mp3 的关卡）")
+        self.title_label.setStyleSheet("font-size: 18px; color: #f0f0f5;")
+
+        self.level_list = QListWidget()
+        self.level_list.itemSelectionChanged.connect(self.on_level_selection_changed)
+        self.level_list.itemDoubleClicked.connect(self.on_level_item_double_clicked)
+        self.level_list.setStyleSheet(
+            """
+            QListWidget {
+                background: #18181e;
+                color: #f0f0f5;
+                border: 1px solid #3a3f58;
+                font-size: 15px;
+                padding: 6px;
+            }
+            QListWidget::item {
+                padding: 8px 6px;
+            }
+            QListWidget::item:selected {
+                background: #3d4d8a;
+            }
+            """
+        )
+
+        self.hint_label = QLabel("点击关卡名后进入模式选择。")
+        self.hint_label.setStyleSheet("color: #a5abc7;")
+
+        self.mode_title_label = QLabel("")
+        self.mode_title_label.setStyleSheet("font-size: 17px; color: #f0f0f5;")
+
+        self.normal_button = QPushButton("normal")
+        self.normal_button.clicked.connect(lambda: self.start_pending_level("default"))
+        self.auto_button = QPushButton("auto")
+        self.auto_button.clicked.connect(lambda: self.start_pending_level("auto"))
+        self.hard_button = QPushButton("hard")
+        self.hard_button.clicked.connect(lambda: self.start_pending_level("hard"))
+        self.back_button = QPushButton("返回选关")
+        self.back_button.clicked.connect(self.show_level_list_page)
+
+        for btn in (self.normal_button, self.auto_button, self.hard_button, self.back_button):
+            btn.setStyleSheet(
+                """
+                QPushButton {
+                    background-color: #2e3d78;
+                    color: #f0f0f5;
+                    border: 1px solid #5a6bb2;
+                    border-radius: 6px;
+                    padding: 10px;
+                    font-size: 15px;
+                }
+                QPushButton:hover {
+                    background-color: #3b4f99;
+                }
+                QPushButton:pressed {
+                    background-color: #243364;
+                }
+                """
+            )
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(14)
+        layout.addWidget(self.title_label)
+        layout.addWidget(self.level_list)
+        layout.addWidget(self.hint_label)
+        layout.addWidget(self.mode_title_label)
+        layout.addWidget(self.normal_button)
+        layout.addWidget(self.auto_button)
+        layout.addWidget(self.hard_button)
+        layout.addWidget(self.back_button)
+
+        self.setStyleSheet("background-color: #101015;")
+        self.refresh_levels()
+        self.show_level_list_page()
+
+    def refresh_levels(self) -> None:
+        self.level_map = self.discover_playable_levels(self.work_dir)
+        self.level_list.clear()
+        for level_name in sorted(self.level_map.keys()):
+            self.level_list.addItem(level_name)
+
+        if self.level_list.count() > 0:
+            self.level_list.setCurrentRow(0)
+            self.hint_label.setText("点击关卡名后进入模式选择。")
+        else:
+            self.hint_label.setText("未找到可用关卡：需在 levels/ 与 audio/ 中同时存在同名文件。")
+
+    @staticmethod
+    def discover_playable_levels(work_dir: str) -> Dict[str, str]:
+        levels_dir = os.path.join(work_dir, "levels")
+        audio_dir = os.path.join(work_dir, "audio")
+        if not os.path.isdir(levels_dir) or not os.path.isdir(audio_dir):
+            return {}
+
+        level_files = [f for f in os.listdir(levels_dir) if f.lower().endswith(".json")]
+        audio_files = [f for f in os.listdir(audio_dir) if f.lower().endswith(".mp3")]
+        level_stems = {os.path.splitext(name)[0]: os.path.join(levels_dir, name) for name in level_files}
+        audio_stems = {os.path.splitext(name)[0] for name in audio_files}
+
+        result: Dict[str, str] = {}
+        for stem, path in level_stems.items():
+            if stem in audio_stems:
+                result[stem] = path
+        return result
+
+    def show_level_list_page(self) -> None:
+        self.in_mode_select = False
+        self.pending_level_name = ""
+        self.pending_level_path = ""
+        self.level_list.setVisible(True)
+        self.hint_label.setVisible(True)
+        self.mode_title_label.setVisible(False)
+        self.normal_button.setVisible(False)
+        self.auto_button.setVisible(False)
+        self.hard_button.setVisible(False)
+        self.back_button.setVisible(False)
+
+    def show_mode_select_page(self, level_name: str, level_path: str) -> None:
+        self.in_mode_select = True
+        self.pending_level_name = level_name
+        self.pending_level_path = level_path
+        self.level_list.setVisible(False)
+        self.hint_label.setVisible(False)
+        self.mode_title_label.setVisible(True)
+        self.normal_button.setVisible(True)
+        self.auto_button.setVisible(True)
+        self.hard_button.setVisible(True)
+        self.back_button.setVisible(True)
+        self.mode_title_label.setText(f"关卡：{level_name}\n请选择模式")
+
+    def start_level_by_path(self, level_path: str, mode: str) -> None:
+        if self.game_window is not None:
+            self.game_window.shutdown()
+            self.game_window.close()
+            self.game_window = None
+
+        self.game_window = FireAndIceGame(level_path=level_path, mode=mode)
+        self.game_window.destroyed.connect(self.on_game_closed)
+        self.hide()
+        self.game_window.show()
+        self.game_window.activateWindow()
+
+    def on_level_selection_changed(self) -> None:
+        item = self.level_list.currentItem()
+        if item is None:
+            return
+        self.on_level_item_chosen(item.text())
+
+    def on_level_item_double_clicked(self, item) -> None:
+        self.on_level_item_chosen(item.text())
+
+    def on_level_item_chosen(self, level_name: str) -> None:
+        level_path = self.level_map.get(level_name, "")
+        if not level_path:
+            return
+        self.show_mode_select_page(level_name, level_path)
+
+    def start_pending_level(self, mode: str) -> None:
+        if not self.pending_level_path:
+            return
+        self.start_level_by_path(self.pending_level_path, mode)
+
+    def on_game_closed(self) -> None:
+        if self.isVisible():
+            return
+        self.game_window = None
+        self.refresh_levels()
+        self.show_level_list_page()
+        self.show()
+        self.raise_()
+        self.activateWindow()
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        super().keyPressEvent(event)
 
 
 def parse_args(argv: List[str], work_dir: str) -> Tuple[str, str]:
@@ -428,9 +644,7 @@ def parse_args(argv: List[str], work_dir: str) -> Tuple[str, str]:
         elif arg.endswith(".json"):
             level_path = arg
 
-    if not level_path:
-        level_path = pick_default_level(work_dir)
-    elif not os.path.isabs(level_path):
+    if level_path and not os.path.isabs(level_path):
         level_path = os.path.abspath(os.path.join(work_dir, level_path))
 
     return level_path, mode
@@ -441,8 +655,10 @@ def main() -> None:
     level_path, mode = parse_args(sys.argv, work_dir)
 
     app = QApplication(sys.argv)
-    game = FireAndIceGame(level_path=level_path, mode=mode)
-    game.show()
+    select_window = LevelSelectWindow(work_dir=work_dir, mode=mode)
+    select_window.show()
+    if level_path:
+        select_window.start_level_by_path(level_path, mode)
     sys.exit(app.exec())
 
 
