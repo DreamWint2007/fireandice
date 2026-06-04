@@ -265,6 +265,8 @@ class FireAndIceGame(QWidget):
             return
 
         beat = self.beats[self.current_beat_idx]
+        if self.mode != "auto" and self.audio_player is not None and self.audio_player.position() == 0:
+            return
         self.current_angle += self.angular_speed * dt
         self.sync_ball_positions()
 
