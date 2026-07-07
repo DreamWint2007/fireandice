@@ -1,12 +1,13 @@
 import json
 import math
 import os
+import random
 import sys
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
 from PyQt6.QtCore import QElapsedTimer, QTimer, Qt, QUrl
-from PyQt6.QtGui import QColor, QFont, QFontDatabase, QKeyEvent, QPainter, QPen
+from PyQt6.QtGui import QColor, QFont, QFontDatabase, QKeyEvent, QPainter, QPen, QPixmap
 from PyQt6.QtWidgets import QApplication, QLabel, QListWidget, QPushButton, QVBoxLayout, QWidget
 try:
     from PyQt6.QtMultimedia import QAudioOutput, QMediaPlayer
@@ -22,6 +23,36 @@ Vec2 = Tuple[float, float]
 class Beat:
     angle: float
     event: str
+
+
+@dataclass
+class Particle:
+    x: float
+    y: float
+    vx: float
+    vy: float
+    life: float
+    max_life: float
+    size: float
+    r: int
+    g: int
+    b: int
+
+
+@dataclass
+class PerfectRing:
+    x: float
+    y: float
+    life: float
+    max_life: float
+
+
+@dataclass
+class PerfectLabel:
+    x: float
+    y: float
+    life: float
+    max_life: float
 
 
 def rotate_screen(vec: Vec2, deg: float) -> Vec2:
@@ -63,6 +94,7 @@ class FireAndIceGame(QWidget):
     COUNTER_CLOCKWISE = 1
     CAMERA_PIXELS_PER_UNIT = 2.0
     CAMERA_SMOOTH = 3.2
+    BACKGROUND_OPACITY = 0.42
 
     def __init__(self, level_path: str, mode: str = "default") -> None:
         super().__init__()
@@ -86,6 +118,9 @@ class FireAndIceGame(QWidget):
         self.player_hit_this_beat = False
         self.perfect_hits = 0
         self.good_hits = 0
+        self.particles: List[Particle] = []
+        self.perfect_rings: List[PerfectRing] = []
+        self.perfect_labels: List[PerfectLabel] = []
 
         self.ball_a_pos: Vec2 = (0.0, 0.0)
         self.ball_b_pos: Vec2 = (0.0, 0.0)
@@ -93,6 +128,7 @@ class FireAndIceGame(QWidget):
         self.audio_player = None
         self.audio_output = None
         self.audio_path = ""
+        self.background_image = QPixmap()
 
         self.setWindowTitle("Fire and Ice")
         self.resize(1200, 800)
@@ -101,6 +137,7 @@ class FireAndIceGame(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
 
         self.load_level()
+        self.load_background()
         self.build_map()
         self.init_audio()
         self.reset_run()
@@ -140,6 +177,39 @@ class FireAndIceGame(QWidget):
         self.beats = [Beat(float(b["angle"]), str(b.get("event", "none"))) for b in data["Beats"]]
         if not self.beats:
             raise ValueError("关卡没有任何节拍数据。")
+
+    def find_matching_background(self) -> QPixmap:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        bkg_dir = os.path.join(base_dir, "bkgimage")
+        if not os.path.isdir(bkg_dir):
+            return QPixmap()
+
+        level_stem = os.path.splitext(os.path.basename(self.level_path))[0]
+        names = []
+        for name in (self.level_name, level_stem):
+            if name and name not in names:
+                names.append(name)
+
+        extensions = (".jpg", ".jpeg", ".png", ".webp", ".bmp")
+        for name in names:
+            for ext in extensions:
+                path = os.path.join(bkg_dir, f"{name}{ext}")
+                if os.path.exists(path):
+                    pixmap = QPixmap(path)
+                    if not pixmap.isNull():
+                        return pixmap
+
+            target = name.lower()
+            for file_name in os.listdir(bkg_dir):
+                stem, ext = os.path.splitext(file_name)
+                if stem.lower() == target and ext.lower() in extensions:
+                    pixmap = QPixmap(os.path.join(bkg_dir, file_name))
+                    if not pixmap.isNull():
+                        return pixmap
+        return QPixmap()
+
+    def load_background(self) -> None:
+        self.background_image = self.find_matching_background()
 
     def find_matching_audio(self) -> str:
         level_stem = os.path.splitext(os.path.basename(self.level_path))[0]
@@ -206,6 +276,9 @@ class FireAndIceGame(QWidget):
         self.player_hit_this_beat = False
         self.perfect_hits = 0
         self.good_hits = 0
+        self.particles.clear()
+        self.perfect_rings.clear()
+        self.perfect_labels.clear()
         self.ball_a_pos = self.nodes[0]
         self.ball_b_pos = self.nodes[1]
         self.camera_pos = self.nodes[0]
@@ -218,6 +291,7 @@ class FireAndIceGame(QWidget):
         elif self.state == "playing":
             self.update_playing(dt)
         self.update_camera(dt)
+        self.update_particles(dt)
         self.update()
 
     def update_prestart(self, dt: float) -> None:
@@ -316,7 +390,8 @@ class FireAndIceGame(QWidget):
 
         # In manual modes, any hit within fail_tolerance is accepted.
         if abs_err <= self.fail_tolerance:
-            if abs_err < 30.0:
+            is_perfect = abs_err < self.success_tolerance
+            if is_perfect:
                 self.perfect_hits += 1
             elif abs_err <= 60.0:
                 self.good_hits += 1
@@ -324,6 +399,8 @@ class FireAndIceGame(QWidget):
             self.carry_offset = err
             self.current_angle = target
             self.sync_ball_positions()
+            if is_perfect:
+                self.spawn_perfect_effect(self.get_moving_ball_pos())
             self.handle_beat_landing()
             return
 
@@ -369,16 +446,147 @@ class FireAndIceGame(QWidget):
         sy = (point[1] - self.camera_pos[1]) * scale + self.height() / 2.0
         return (sx, sy)
 
+    def get_moving_ball_pos(self) -> Vec2:
+        if self.current_beat_idx % 2 == 0:
+            return self.ball_a_pos
+        return self.ball_b_pos
+
+    def spawn_perfect_effect(self, world_pos: Vec2) -> None:
+        sx, sy = self.map_to_screen(world_pos)
+        ring_life = 0.7
+        label_life = 0.85
+        self.perfect_rings.append(PerfectRing(sx, sy, ring_life, ring_life))
+        self.perfect_labels.append(PerfectLabel(sx, sy - 34.0, label_life, label_life))
+
+        colors = (
+            (255, 228, 96),
+            (255, 255, 255),
+            (255, 110, 90),
+            (90, 190, 255),
+            (255, 180, 60),
+        )
+        for _ in range(56):
+            angle = random.uniform(0.0, math.tau)
+            speed = random.uniform(220.0, 620.0)
+            vx = math.cos(angle) * speed
+            vy = math.sin(angle) * speed
+            life = random.uniform(0.55, 0.95)
+            size = random.uniform(5.0, 13.0)
+            r, g, b = colors[random.randrange(len(colors))]
+            self.particles.append(
+                Particle(
+                    x=sx,
+                    y=sy,
+                    vx=vx,
+                    vy=vy,
+                    life=life,
+                    max_life=life,
+                    size=size,
+                    r=r,
+                    g=g,
+                    b=b,
+                )
+            )
+        self.update()
+
+    def update_particles(self, dt: float) -> None:
+        dt = min(dt, 0.033)
+
+        alive_particles: List[Particle] = []
+        drag = 0.9
+        gravity = 120.0
+        for particle in self.particles:
+            particle.life -= dt
+            if particle.life <= 0.0:
+                continue
+            particle.x += particle.vx * dt
+            particle.y += particle.vy * dt
+            particle.vy += gravity * dt
+            particle.vx *= drag
+            particle.vy *= drag
+            alive_particles.append(particle)
+        self.particles = alive_particles
+
+        alive_rings: List[PerfectRing] = []
+        for ring in self.perfect_rings:
+            ring.life -= dt
+            if ring.life > 0.0:
+                alive_rings.append(ring)
+        self.perfect_rings = alive_rings
+
+        alive_labels: List[PerfectLabel] = []
+        for label in self.perfect_labels:
+            label.life -= dt
+            if label.life > 0.0:
+                alive_labels.append(label)
+        self.perfect_labels = alive_labels
+
+    def draw_particles(self, painter: QPainter) -> None:
+        painter.save()
+        painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceOver)
+
+        for ring in self.perfect_rings:
+            t = ring.life / ring.max_life
+            radius = 16.0 + (1.0 - t) * 72.0
+            alpha = int(220 * t)
+            pen = QPen(QColor(255, 230, 110, alpha), 4)
+            painter.setPen(pen)
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            painter.drawEllipse(int(ring.x - radius), int(ring.y - radius), int(radius * 2), int(radius * 2))
+
+        painter.setPen(Qt.PenStyle.NoPen)
+        for particle in self.particles:
+            t = max(0.0, particle.life / particle.max_life)
+            alpha = int(255 * t)
+            size = particle.size * (0.5 + 0.5 * t)
+            painter.setBrush(QColor(particle.r, particle.g, particle.b, alpha))
+            painter.drawEllipse(int(particle.x - size), int(particle.y - size), int(size * 2), int(size * 2))
+
+        families = QFontDatabase.families()
+        mono_family = next((name for name in ("Menlo", "SF Mono", "Monaco", "Courier New", "Consolas") if name in families), "")
+        for label in self.perfect_labels:
+            t = max(0.0, label.life / label.max_life)
+            alpha = int(255 * t)
+            scale = 18 + int((1.0 - t) * 10)
+            font = QFont(mono_family, scale) if mono_family else QFont()
+            if not mono_family:
+                font.setPointSize(scale)
+            font.setBold(True)
+            painter.setFont(font)
+            painter.setPen(QColor(255, 244, 168, alpha))
+            text = "PERFECT"
+            text_width = painter.fontMetrics().horizontalAdvance(text)
+            painter.drawText(int(label.x - text_width / 2), int(label.y), text)
+
+        painter.restore()
+
     def draw_ball(self, painter: QPainter, pos: Vec2, color: QColor) -> None:
         sx, sy = self.map_to_screen(pos)
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(color)
         painter.drawEllipse(int(sx - self.BALL_RADIUS), int(sy - self.BALL_RADIUS), self.BALL_RADIUS * 2, self.BALL_RADIUS * 2)
 
+    def draw_background(self, painter: QPainter) -> None:
+        painter.fillRect(self.rect(), QColor(16, 16, 20))
+        if self.background_image.isNull():
+            return
+
+        scaled = self.background_image.scaled(
+            self.size(),
+            Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+            Qt.TransformationMode.SmoothTransformation,
+        )
+        x = (self.width() - scaled.width()) // 2
+        y = (self.height() - scaled.height()) // 2
+        painter.save()
+        painter.setOpacity(self.BACKGROUND_OPACITY)
+        painter.drawPixmap(x, y, scaled)
+        painter.restore()
+
     def paintEvent(self, _event) -> None:
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.fillRect(self.rect(), QColor(16, 16, 20))
+        self.draw_background(painter)
 
         # Draw lines
         pen_line = QPen(QColor(80, 160, 255), 3)
@@ -423,6 +631,8 @@ class FireAndIceGame(QWidget):
                 acc = (self.perfect_hits / total_beats) if total_beats else 0.0
                 info += f" | ACC: {acc * 100:.2f}%"
         painter.drawText(16, 52, info)
+
+        self.draw_particles(painter)
 
         if self.state == "won":
             if self.mode == "default":
