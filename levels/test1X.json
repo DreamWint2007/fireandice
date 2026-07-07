@@ -1,6 +1,6 @@
 {
     "levelname": "test1X",
-    "initial_bpm": 157,
+    "initial_bpm": 151.99908088235293,
     "Beats": [
         {
             "angle": 180.0,
@@ -127,14 +127,6 @@
             "event": "none"
         },
         {
-            "angle": 270.0,
-            "event": "none"
-        },
-        {
-            "angle": 90.0,
-            "event": "none"
-        },
-        {
             "angle": 180.0,
             "event": "none"
         },
@@ -188,14 +180,10 @@
         },
         {
             "angle": 180.0,
-            "event": "none"
-        },
-        {
-            "angle": 270.0,
             "event": "none"
         },
         {
-            "angle": 90.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
@@ -255,11 +243,11 @@
             "event": "none"
         },
         {
-            "angle": 270.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 90.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
@@ -319,11 +307,11 @@
             "event": "none"
         },
         {
-            "angle": 90.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 270.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
@@ -383,11 +371,11 @@
             "event": "none"
         },
         {
-            "angle": 90.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 270.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
@@ -439,19 +427,19 @@
             "event": "none"
         },
         {
-            "angle": 90.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 270.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 90.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 270.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
@@ -487,27 +475,27 @@
             "event": "none"
         },
         {
-            "angle": 270.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 90.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 270.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 90.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 270.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 90.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
@@ -567,19 +555,19 @@
             "event": "none"
         },
         {
-            "angle": 90.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 270.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 90.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 270.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
@@ -615,19 +603,19 @@
             "event": "none"
         },
         {
-            "angle": 270.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 90.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 270.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 90.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
@@ -639,11 +627,11 @@
             "event": "none"
         },
         {
-            "angle": 90.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
-            "angle": 270.0,
+            "angle": 180.0,
             "event": "none"
         },
         {
@@ -707,7 +695,7 @@
             "event": "none"
         },
         {
-            "angle": 180.0,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+            "angle": 180.0,
             "event": "none"
         },
         {
