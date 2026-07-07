@@ -13,3 +13,8 @@
 如果成功按下节点事件为complete，游戏胜利。
 
 游戏分为3个mode: default, auto, hard。上面的默认模式就是default。auto：自动展示关卡的模式。hard：容错改为30°。
+
+视频
+https://disk.pku.edu.cn/link/ARB6ADF9831B3C49F78091156FFC1AB148
+文件名：bandicam 2026-07-07 17-10-03-911.mp4
+文件路径：AnyShare://赵思齐_2500017756/bandicam 2026-07-07 17-10-03-911.mp4
